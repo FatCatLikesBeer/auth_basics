@@ -1,41 +1,33 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
+const express = require("express");
+const path = require("path");
+const session = require("express-session");
+const passport = require("passport");
+const LocalStrategy = require("passport-local").Strategy;
+const mongoose = require("mongoose");
+const Schema = mongoose.Schema;
 
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+const mongoDB = process.env.MONGODB_URI;
+mongoose.connect(mongoDB);
+const db = mongoose.connection;
+db.on("error", console.error.bind(console, "MongoDb connection error"));
 
-var app = express();
+const User = mongoose.model(
+  "User",
+  new Schema({
+    username: { type: String, required: true },
+    password: { type: String, required: true }
+  })
+);
 
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'ejs');
+const app = express();
+app.set("views", __dirname);
+app.set("view engine", "ejs");
 
-app.use(logger('dev'));
-app.use(express.json());
+app.use(session({ secret: "cats", resave: false, saveUninitialized: true }));
+app.use(passport.session());
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
+app.get("/", (req, res) => res.render("index"));
+app.get("/sign-up", (req, res) => res.render("sign-up-form"));
 
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  next(createError(404));
-});
-
-// error handler
-app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
-
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
-});
-
-module.exports = app;
+app.listen(3000, () => console.log("App listening on port 3000!"));
