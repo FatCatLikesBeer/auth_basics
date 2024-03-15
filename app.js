@@ -6,6 +6,7 @@ const LocalStrategy = require("passport-local").Strategy;
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const bcrypt = require("bcryptjs");
+var logger = require('morgan');
 
 //// ------ MongoDB Stuff ------ ////
 // MongoDB connection URI passed as environment variable
@@ -35,6 +36,7 @@ app.use(session({ secret: "cats", resave: false, saveUninitialized: true }));
 // This is for authentication.
 app.use(passport.session());
 app.use(express.urlencoded({ extended: false }));
+app.use(logger('dev'));
 
 //// ------ Passport Stuff ------ ////
 // Passport.js local login 'strategy'
